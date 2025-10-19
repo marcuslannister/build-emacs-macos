@@ -158,7 +158,8 @@ echo "
     --with-native-compilation \
     --with-xwidgets \
     --with-modules \
-    --with-mailutils \
+    --with-treesitter \
+    # --with-mailutils \
     --with-json \
     --without-compress-install \
     --program-transform-name='s/^ctags$/emctags/' \
