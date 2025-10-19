@@ -90,10 +90,10 @@ echo "
 "
 
 # Note that this applies all patches in 'patches' dir
-for f in ${PATCH_LIST}; do
-    echo "Applying patch `basename $f`"
-    patch -p1 -i $f
-done
+# for f in ${PATCH_LIST}; do
+#     echo "Applying patch `basename $f`"
+#     patch -p1 -i $f
+# done
 
 # ======================================================
 # Info settings
