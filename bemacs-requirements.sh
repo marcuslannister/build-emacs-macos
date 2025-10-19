@@ -30,7 +30,7 @@ binaries=(
   autoconf
   automake
   gcc
-  git
+  # git
   giflib
   gnutls
   jansson
@@ -40,6 +40,7 @@ binaries=(
   libxml2
   pkg-config
   texinfo
+  libmps
   )
 
 echo "installing binaries..."
