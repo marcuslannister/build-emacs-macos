@@ -33,6 +33,7 @@ echo "
 if ! command -v brew </dev/null 2>&1
 then
    echo "Please install homebrew -- see bemacs-requirements.sh"
+   exit 1
 else
     echo "Homebrew installed!"
 fi
@@ -80,7 +81,7 @@ git archive --format tar $commit | tar -C ${BUILD_DIR} -xvf -
 
 REV=`git log -n 1 --no-color --pretty='format:%h' ${commit}`
 TIMESTAMP=`git log -n 1 --no-color --pretty='format:%at' ${commit}`
-PATCH_LIST=`find ${ROOT_DIR}/patches/ -name '*.patch'`
+PATCH_LIST=`find ${ROOT_DIR}/patches/ -name '*.patch' 2>/dev/null || true`
 cd ${BUILD_DIR}
 
 echo "
@@ -130,7 +131,6 @@ echo "
 # See https://leeifrankjaw.github.io/articles/clang_vs_gcc_for_emacs.html
 # See https://alibabatech.medium.com/gcc-vs-clang-llvm-an-in-depth-comparison-of-c-c-compilers-899ede2be378
 # See https://docs.oracle.com/cd/E19957-01/806-3567/cc_options.html for CFLAG option explanations
-# CFLAGS="-g -O2"
 export CC=clang
 export OBJC=clang
 
@@ -153,17 +153,6 @@ echo "
 # installed ctags; see and don't compress info files, etc
 # https://www.topbug.net/blog/2016/11/10/installing-emacs-from-source-avoid-the-conflict-of-ctags/
 
-# Commented out options:
-    # --with-dbus
-    # --with-ns
-    # --with-native-compilation
-    # --with-xwidgets
-    # --with-modules
-    # --with-mailutils
-    # --with-json
-    # --without-compress-install
-    # --program-transform-name='s/^ctags$/emctags/'
-
 ./configure \
     --with-ns \
     --without-pop \
@@ -184,7 +173,7 @@ echo "
     CFLAGS="-O3 -fno-math-errno -funsafe-math-optimizations -fno-finite-math-only -fno-trapping-math \
                   -freciprocal-math -fno-rounding-math \
                   -fassociative-math -fno-signed-zeros -funroll-loops \
-                  -mtune=native -march=native -fomit-frame-pointer "
+                  -mtune=native -march=native -fomit-frame-pointer"
 
 
 echo "
@@ -198,7 +187,8 @@ NCPU=$(getconf _NPROCESSORS_ONLN)
 
 ## Send output to log file using tee
 ## See https://stackoverflow.com/a/60432203/6277148
-make bootstrap -j$NCPU | tee bootstrap-log.txt || exit 1 && make install -j$NCPU | tee build-log.txt
+make bootstrap -j$NCPU | tee bootstrap-log.txt || exit 1
+make install -j$NCPU | tee build-log.txt
 
 echo "DONE!"
 
@@ -221,7 +211,7 @@ then
    if command -v trash </dev/null 2>&1
    then
     echo "Trashing old emacs..."
-    trash /Applications/Emacs.app
+    trash /Applications/Emacs.app || true
    else
     echo "Removing old emacs..."
     rm -rf /Applications/Emacs.app
@@ -242,9 +232,14 @@ echo "
 # This records the Git SHA to an elisp file and
 # moves it to the site-lisp dir in the emacs build
 
-cp ${ROOT_DIR}/materials/${GIT_VERSION} ${BUILD_DIR}/
-sed -e "s/@@GIT_COMMIT@@/$REV/" -i '' ${BUILD_DIR}/${GIT_VERSION}
-mv -f ${BUILD_DIR}/${GIT_VERSION} ${SITELISP}/${GIT_VERSION}
+if [ -f ${ROOT_DIR}/materials/${GIT_VERSION} ]; then
+    cp ${ROOT_DIR}/materials/${GIT_VERSION} ${BUILD_DIR}/
+    sed -e "s/@@GIT_COMMIT@@/$REV/" -i '' ${BUILD_DIR}/${GIT_VERSION}
+    mv -f ${BUILD_DIR}/${GIT_VERSION} ${SITELISP}/${GIT_VERSION}
+    echo "Git version file created"
+else
+    echo "Warning: ${ROOT_DIR}/materials/${GIT_VERSION} not found, skipping..."
+fi
 
 echo "DONE!"
 
@@ -256,7 +251,12 @@ echo "
 
 # Copy new icon to emacs (currently using a big sur icon)
 # See https://github.com/d12frosted/homebrew-emacs-plus/issues/419
-cp ${ROOT_DIR}/materials/emacs-big-sur.icns /Applications/Emacs.app/Contents/Resources/Emacs.icns
+if [ -f ${ROOT_DIR}/materials/emacs-big-sur.icns ]; then
+    cp ${ROOT_DIR}/materials/emacs-big-sur.icns /Applications/Emacs.app/Contents/Resources/Emacs.icns
+    echo "Custom icon installed"
+else
+    echo "Warning: ${ROOT_DIR}/materials/emacs-big-sur.icns not found, using default icon..."
+fi
 
 echo "DONE!"
 
@@ -279,7 +279,8 @@ echo "
 
 # Make a directory for the build's log files and move them there
 # Note that this removes a previous identical dir if making multiple similar builds
-rm -rf ${ROOT_DIR}/build-logs/${DESCR}; mkdir -p ${ROOT_DIR}/build-logs/
+mkdir -p ${ROOT_DIR}/build-logs/
+rm -rf ${ROOT_DIR}/build-logs/${DESCR}
 mv ${BUILD_DIR}/config.log ${ROOT_DIR}/build-logs/config-${DESCR}.log
 mv ${BUILD_DIR}/build-log.txt ${ROOT_DIR}/build-logs/build-log-${DESCR}.txt
 mv ${BUILD_DIR}/bootstrap-log.txt ${ROOT_DIR}/build-logs/bootstrap-log-${DESCR}.txt
@@ -299,20 +300,15 @@ echo "DONE!"
 
 echo "
 # ======================================================
-# Add executables to path
+# Note about PATH
 #
-# Be sure to add /Applications/Emacs.app/Contents/MacOS/bin
-# to your .zshrc or .profile path like so:
+# The Emacs.app is now installed in /Applications/
+# If you need command-line access to emacs/emacsclient,
+# add these to your .zshrc or .profile:
 # export PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS
 # export PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin
 # ======================================================
 "
-
-export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS
-export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
-
-echo "execs added to this terminal session -- please
-modify your .zshrc or .zprofile file accordingly"
 
 echo "
 # ======================================================
@@ -323,3 +319,4 @@ echo "
 open /Applications/Emacs.app
 
 echo "Build script finished!"
+
