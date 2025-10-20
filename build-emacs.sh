@@ -10,7 +10,7 @@
 # See https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
 # ======================================================
 
-# set -e
+set -e
 
 # ======================================================
 # Set Variables
@@ -56,7 +56,7 @@ echo "
 "
 
 rm -rf ${BUILD_DIR}
-mkdir ${BUILD_DIR}
+mkdir -p ${BUILD_DIR}
 
 cd ${SRC_DIR}
 
@@ -208,8 +208,8 @@ echo "
 # ======================================================
 "
 
-# Close any emacs sessions
-pkill -i emacs
+# Close any emacs sessions (don't fail if none running)
+pkill -i emacs || true
 
 # Remove old emacs
 # See https://stackoverflow.com/a/677212/6277148
@@ -279,7 +279,7 @@ echo "
 
 # Make a directory for the build's log files and move them there
 # Note that this removes a previous identical dir if making multiple similar builds
-rm -rf ${ROOT_DIR}/build-logs/${DESCR}; mkdir ${ROOT_DIR}/build-logs/
+rm -rf ${ROOT_DIR}/build-logs/${DESCR}; mkdir -p ${ROOT_DIR}/build-logs/
 mv ${BUILD_DIR}/config.log ${ROOT_DIR}/build-logs/config-${DESCR}.log
 mv ${BUILD_DIR}/build-log.txt ${ROOT_DIR}/build-logs/build-log-${DESCR}.txt
 mv ${BUILD_DIR}/bootstrap-log.txt ${ROOT_DIR}/build-logs/bootstrap-log-${DESCR}.txt
