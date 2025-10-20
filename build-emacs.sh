@@ -170,6 +170,7 @@ echo "
     --with-modules \
     --with-xml2 \
     --with-wide-int \
+    --with-json \
     CFLAGS="-O3 -fno-math-errno -funsafe-math-optimizations -fno-finite-math-only -fno-trapping-math \
                   -freciprocal-math -fno-rounding-math \
                   -fassociative-math -fno-signed-zeros -funroll-loops \
