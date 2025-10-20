@@ -130,7 +130,7 @@ echo "
 # See https://leeifrankjaw.github.io/articles/clang_vs_gcc_for_emacs.html
 # See https://alibabatech.medium.com/gcc-vs-clang-llvm-an-in-depth-comparison-of-c-c-compilers-899ede2be378
 # See https://docs.oracle.com/cd/E19957-01/806-3567/cc_options.html for CFLAG option explanations
-CFLAGS="-g -O2"
+# CFLAGS="-g -O2"
 export CC=clang
 export OBJC=clang
 
@@ -152,17 +152,40 @@ echo "
 # Note that this renames ctags in emacs so that it doesn't conflict with other
 # installed ctags; see and don't compress info files, etc
 # https://www.topbug.net/blog/2016/11/10/installing-emacs-from-source-avoid-the-conflict-of-ctags/
+
+# Commented out options:
+    # --with-dbus
+    # --with-ns
+    # --with-native-compilation
+    # --with-xwidgets
+    # --with-modules
+    # --with-mailutils
+    # --with-json
+    # --without-compress-install
+    # --program-transform-name='s/^ctags$/emctags/'
+
 ./configure \
-    --with-dbus \
     --with-ns \
-    --with-native-compilation \
+    --without-pop \
     --with-xwidgets \
-    --with-modules \
-    --with-treesitter \
-    # --with-mailutils \
-    --with-json \
+    --without-imagemagick \
     --without-compress-install \
-    --program-transform-name='s/^ctags$/emctags/' \
+    --without-dbus \
+    --with-gnutls \
+    --with-tree-sitter \
+    --without-gconf \
+    --with-rsvg \
+    --without-gsettings \
+    --with-mps \
+    --with-native-compilation \
+    --with-modules \
+    --with-xml2 \
+    --with-wide-int \
+    CFLAGS="-O3 -fno-math-errno -funsafe-math-optimizations -fno-finite-math-only -fno-trapping-math \
+                  -freciprocal-math -fno-rounding-math \
+                  -fassociative-math -fno-signed-zeros -funroll-loops \
+                  -mtune=native -march=native -fomit-frame-pointer "
+
 
 echo "
 # ======================================================
